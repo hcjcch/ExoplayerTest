@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     val trackSelector = DefaultTrackSelector()
     val player: SimpleExoPlayer by lazy {
-        trackSelector.setParameters(trackSelector.buildUponParameters().setMaxVideoSize(100, 100))
+        //        trackSelector.setParameters(trackSelector.buildUponParameters().setMaxVideoSize(100, 100))
         val exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector)
         exoPlayerPlayerView.player = exoPlayer
         exoPlayer
@@ -26,12 +26,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "MainActivity"))
+        val dataSourceFactory = CustomDownloadManager.buildDatasourceFactory()
         val videoResource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse("asset:///_chaos_0728_A029C0034_main_s.mp4"))
-        val audioResource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse("asset:///_chaos_0703_A0511.mp3"))
-        val seq = ConcatenatingMediaSource(audioResource, videoResource)
+            .createMediaSource(Uri.parse("https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4"))
+//        val audioResource = ProgressiveMediaSource.Factory(dataSourceFactory)
+//            .createMediaSource(Uri.parse("asset:///_chaos_0703_A0511.mp3"))
+//        val seq = ConcatenatingMediaSource(audioResource, videoResource)
         player.addListener(object : Player.EventListener {
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
                 super.onPlaybackParametersChanged(playbackParameters)
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d("huangchen", "onPlayerStateChanged  playWhenReady: $playWhenReady，playbackState：$playbackState")
             }
         })
-        player.prepare(seq)
+        player.prepare(videoResource)
         player.playWhenReady = true
     }
 }
