@@ -3,6 +3,9 @@ package com.example.exoplayertest
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.Log
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.*
@@ -15,6 +18,10 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 
 class MainActivity : AppCompatActivity() {
 
+    val dataSourceFactory by lazy {
+        DefaultDataSourceFactory(this, "Test")
+    }
+
     val trackSelector = DefaultTrackSelector()
     val player: SimpleExoPlayer by lazy {
         //        trackSelector.setParameters(trackSelector.buildUponParameters().setMaxVideoSize(100, 100))
@@ -26,12 +33,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val dataSourceFactory = CustomDownloadManager.buildDatasourceFactory()
-        val videoResource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse("https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4"))
-//        val audioResource = ProgressiveMediaSource.Factory(dataSourceFactory)
-//            .createMediaSource(Uri.parse("asset:///_chaos_0703_A0511.mp3"))
-//        val seq = ConcatenatingMediaSource(audioResource, videoResource)
+
+//        val videoResource = ProgressiveMediaSource.Factory(dataSourceFactory)
+//            .createMediaSource(Uri.parse("https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4"))
+
+        Thread(Runnable {
+            while (true) {
+                Thread.sleep(2000)
+                Handler(Looper.getMainLooper()).post {
+                    play()
+                }
+            }
+        }).start()
+    }
+
+    private fun play() {
+        val audioResource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(Uri.parse("asset:///_chaos_0703_A0511.mp3"))
+        //        val seq = ConcatenatingMediaSource(audioResource, videoResource)
         player.addListener(object : Player.EventListener {
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
                 super.onPlaybackParametersChanged(playbackParameters)
@@ -41,7 +60,10 @@ class MainActivity : AppCompatActivity() {
                 super.onSeekProcessed()
             }
 
-            override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
+            override fun onTracksChanged(
+                trackGroups: TrackGroupArray?,
+                trackSelections: TrackSelectionArray?
+            ) {
                 super.onTracksChanged(trackGroups, trackSelections)
             }
 
@@ -72,10 +94,13 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
-                Log.d("huangchen", "onPlayerStateChanged  playWhenReady: $playWhenReady，playbackState：$playbackState")
+                Log.d(
+                    "huangchen",
+                    "onPlayerStateChanged  playWhenReady: $playWhenReady，playbackState：$playbackState"
+                )
             }
         })
-        player.prepare(videoResource)
+        player.prepare(audioResource)
         player.playWhenReady = true
     }
 }
